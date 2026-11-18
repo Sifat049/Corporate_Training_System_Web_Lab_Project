@@ -6,6 +6,7 @@ Banglish note:
 - FRONTEND_DIR = frontend/ folder (HTML templates + CSS + JS ekhane thake).
   Django ke bole dite hoy template ar static file kothay ache - seta niche kora hoyeche.
 """
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent          # .../50_Percent_Version/backend
@@ -13,9 +14,12 @@ PROJECT_DIR = BASE_DIR.parent                              # .../50_Percent_Vers
 FRONTEND_DIR = PROJECT_DIR / "frontend"                    # .../50_Percent_Version/frontend
 
 # Academic demo project - production e deploy korle ei key bodle felben
-SECRET_KEY = "django-insecure-corporate-training-demo-key-change-me"
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
+# Banglish: local e kichu set korte hobe na. Live (PythonAnywhere) e environment variable diye bodlano jay.
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-corporate-training-demo-key-change-me")
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver", ".pythonanywhere.com"]
+ALLOWED_HOSTS += [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
+CSRF_TRUSTED_ORIGINS = ["https://*.pythonanywhere.com"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -90,6 +94,7 @@ USE_TZ = True
 # Static files (CSS, JS, images) frontend/static folder theke ashe
 STATIC_URL = "static/"
 STATICFILES_DIRS = [FRONTEND_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic ekhane file jomay (live server er jonno)
 
 # User upload kora file (video, document, submission) backend/media te jabe
 MEDIA_URL = "media/"
