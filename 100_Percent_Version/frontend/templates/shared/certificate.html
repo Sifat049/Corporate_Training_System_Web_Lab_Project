@@ -1,0 +1,26 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Certificate{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h2>Certificate of Completion</h2><p>Use Print and choose "Save as PDF" to download it.</p></div>
+  <div class="actions"><button type="button" class="btn btn-primary" onclick="window.print()">{% icon 'printer' 16 %} Print / Save PDF</button>
+  <a href="javascript:history.back()" class="btn btn-outline">&larr; Back</a></div></div>
+<div class="certificate">
+  <div class="cert-border"><div class="cert-inner">
+    <div class="cert-logo">CT</div>
+    <div class="cert-kicker">Corporate Training System</div>
+    <h1>Certificate of Completion</h1>
+    <p class="cert-lead">This is proudly presented to</p>
+    <div class="cert-name">{{ assignment.employee.display_name }}</div>
+    <p class="cert-lead">for successfully completing the training module</p>
+    <div class="cert-module">{{ assignment.module.title }}</div>
+    <p class="cert-meta">{{ assignment.module.category.name }} &middot; {{ assignment.module.get_difficulty_display }} &middot; {{ assignment.module.duration_hours }} hours</p>
+    <div class="cert-foot">
+      <div><strong>{{ cert.issued_at|date:"d F Y" }}</strong><span>Date issued</span></div>
+      <div class="cert-seal">{% icon 'award' 40 %}</div>
+      <div><strong>{{ cert.code }}</strong><span>Certificate code</span></div>
+    </div>
+    <p class="cert-verify">Verify at <span class="mono">{{ request.scheme }}://{{ request.get_host }}{% url 'training:certificate_verify' cert.code %}</span></p>
+  </div></div>
+</div>
+{% endblock %}

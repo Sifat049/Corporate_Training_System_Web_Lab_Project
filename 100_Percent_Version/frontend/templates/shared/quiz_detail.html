@@ -1,0 +1,21 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Quiz: {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h2>{{ quiz.title }}</h2><p>{{ quiz.description|default:"Auto-graded multiple choice quiz." }} Pass mark: <strong>{{ quiz.pass_percent }}%</strong> &middot; {{ attempt_count }} attempt(s) so far.</p></div>
+  <div class="actions"><a href="{% url 'training:question_add' quiz.pk %}" class="btn btn-primary">{% icon 'plus' 16 %} Add question</a>
+    <a href="{% url 'training:quiz_edit' quiz.pk %}" class="btn btn-outline">Edit quiz</a>
+    <a href="{% url 'training:module_detail' quiz.module_id %}" class="btn btn-outline">&larr; Module</a></div>
+</div>
+{% for q in questions %}
+<div class="card">
+  <div class="card-header"><h3>Q{{ forloop.counter }}. {{ q.text }}</h3>
+    <div class="actions"><a href="{% url 'training:question_edit' q.pk %}" class="btn btn-outline btn-sm">Edit</a>
+    <form method="post" action="{% url 'training:question_delete' q.pk %}" class="inline" data-confirm="Delete this question?">{% csrf_token %}<button type="submit" class="btn btn-danger btn-sm">Delete</button></form></div></div>
+  <div class="card-body"><ul class="choice-list">{% for c in q.choices.all %}<li class="{% if c.is_correct %}correct{% endif %}"><span class="choice-mark">{% if c.is_correct %}&#10003;{% else %}{{ forloop.counter }}{% endif %}</span>{{ c.text }}</li>{% endfor %}</ul></div>
+</div>
+{% empty %}
+<div class="card">{% include "partials/_empty.html" with message="No questions yet. Add your first question." icon_name="help" %}</div>
+{% endfor %}
+{% endblock %}

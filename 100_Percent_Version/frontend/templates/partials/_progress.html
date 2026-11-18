@@ -1,0 +1,5 @@
+{% load ui_extras %}{# {% include "partials/_progress.html" with value=assignment.progress_percent %} #}
+<div class="progress-row">
+  <div class="progress" style="flex:1"><span class="{{ value|progress_color }}" data-value="{{ value }}"></span></div>
+  <span class="pct">{{ value }}%</span>
+</div>

@@ -1,0 +1,20 @@
+{% load static %}<!DOCTYPE html>
+{# Banglish note: base.html holo "master template". Baki shob page eta ke extend kore ar nijer content block er moddhe boshay. Tahole head/CSS/JS bar bar likhte hoy na. #}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Corporate Training System{% endblock %}</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <script>/* dark/light theme flash na howar jonno age-i set kori */(function(){try{var t=localStorage.getItem("ct-theme");if(!t){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% block body %}{% endblock %}
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/charts.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

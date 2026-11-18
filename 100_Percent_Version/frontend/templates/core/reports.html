@@ -1,0 +1,24 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Reports{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>Reports &amp; analytics</h2><p>Department performance, category skill levels and CSV exports (open in Excel).</p></div></div>
+<div class="grid grid-3">
+  <a class="card export-card" href="{% url 'core:export_employees' %}">{% icon 'download' 24 %}<div><strong>Employees</strong><span>Directory with progress and skill</span></div></a>
+  <a class="card export-card" href="{% url 'core:export_progress' %}">{% icon 'download' 24 %}<div><strong>Training progress</strong><span>All assignments with status</span></div></a>
+  <a class="card export-card" href="{% url 'core:export_gaps' %}">{% icon 'download' 24 %}<div><strong>Skill gaps</strong><span>Employees below required level</span></div></a>
+</div>
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Average progress by department</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="dept" data-height="260"></canvas></div></div>
+  <div class="card"><div class="card-header"><h3>Training status</h3></div><div class="card-body chart-box"><canvas data-chart="donut" data-key="status" data-height="260"></canvas></div></div>
+</div>
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Departments</h3></div><div class="table-wrap"><table class="table"><thead><tr><th>Department</th><th>Employees</th><th>Avg progress</th><th>Avg skill</th></tr></thead><tbody>
+    {% for r in dept_rows %}<tr><td class="cell-title">{{ r.department }}</td><td>{{ r.count }}</td><td>{% include "partials/_progress.html" with value=r.avg_progress %}</td><td>{{ r.avg_skill|default:"-" }}</td></tr>
+    {% empty %}<tr><td colspan="4">{% include "partials/_empty.html" with message="No employees yet." icon_name="users" %}</td></tr>{% endfor %}</tbody></table></div></div>
+  <div class="card"><div class="card-header"><h3>Skill by category</h3></div><div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Required</th><th>Average level</th><th>Assessed</th></tr></thead><tbody>
+    {% for r in cat_rows %}<tr><td class="cell-title">{{ r.category.name }}</td><td>{{ r.category.required_level }}</td><td>{{ r.avg|default:"-" }}</td><td>{{ r.assessed }}</td></tr>
+    {% empty %}<tr><td colspan="4">No categories.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>
+{{ charts|json_script:"chart-data" }}
+{% endblock %}

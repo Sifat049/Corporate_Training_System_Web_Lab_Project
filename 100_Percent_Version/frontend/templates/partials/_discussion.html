@@ -1,0 +1,40 @@
+{% load ui_extras %}{# Module discussion: comments (Q&A) + reply. Context: module, comments, comment_form #}
+<div class="card" id="discussion">
+  <div class="card-header"><h3>Discussion &amp; Q&amp;A</h3><span class="small muted">Ask a question or reply</span></div>
+  <div class="card-body">
+    <form method="post" action="{% url 'training:comment_add' module.pk %}" class="comment-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}#discussion">
+      {{ comment_form.body }}
+      <button type="submit" class="btn btn-primary btn-sm">{% icon 'message' 15 %} Post</button>
+    </form>
+    <div class="comments">
+      {% for c in comments %}
+      <div class="comment">
+        <div class="avatar sm">{{ c.author.initials }}</div>
+        <div class="comment-main">
+          <div class="comment-head"><strong>{{ c.author.display_name }}</strong><span class="badge badge-muted">{{ c.author.get_role_display }}</span><span class="muted small">{{ c.created_at|timesince }} ago</span>
+            {% if user.is_admin or c.author_id == user.id %}<form method="post" action="{% url 'training:comment_delete' c.pk %}" class="inline" data-confirm="Delete this comment?">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}#discussion"><button type="submit" class="link-btn">Delete</button></form>{% endif %}</div>
+          <p>{{ c.body|linebreaksbr }}</p>
+          {% for r in c.replies.all %}
+          <div class="comment reply">
+            <div class="avatar sm alt">{{ r.author.initials }}</div>
+            <div class="comment-main">
+              <div class="comment-head"><strong>{{ r.author.display_name }}</strong><span class="badge badge-muted">{{ r.author.get_role_display }}</span><span class="muted small">{{ r.created_at|timesince }} ago</span>
+                {% if user.is_admin or r.author_id == user.id %}<form method="post" action="{% url 'training:comment_delete' r.pk %}" class="inline" data-confirm="Delete this reply?">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}#discussion"><button type="submit" class="link-btn">Delete</button></form>{% endif %}</div>
+              <p>{{ r.body|linebreaksbr }}</p>
+            </div>
+          </div>
+          {% endfor %}
+          <details class="reply-box"><summary>Reply</summary>
+            <form method="post" action="{% url 'training:comment_add' module.pk %}" class="comment-form">
+              {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}#discussion"><input type="hidden" name="parent" value="{{ c.pk }}">
+              {{ comment_form.body }}<button type="submit" class="btn btn-outline btn-sm">Send reply</button>
+            </form>
+          </details>
+        </div>
+      </div>
+      {% empty %}{% include "partials/_empty.html" with message="No discussion yet. Be the first to ask a question." icon_name="message" %}{% endfor %}
+    </div>
+  </div>
+</div>

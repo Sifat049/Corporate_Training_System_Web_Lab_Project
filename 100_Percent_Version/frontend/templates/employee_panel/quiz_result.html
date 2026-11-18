@@ -1,0 +1,20 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Quiz result{% endblock %}
+{% block content %}
+<div class="result-hero {% if attempt.passed %}pass{% else %}fail{% endif %}">
+  <div class="score-ring" style="--p:{{ attempt.percent }}"><span>{{ attempt.percent }}%</span></div>
+  <div><h2>{% if attempt.passed %}You passed!{% else %}Not passed yet{% endif %}</h2>
+    <p>{{ attempt.correct }} of {{ attempt.total }} correct in "{{ attempt.quiz.title }}". Pass mark is {{ attempt.quiz.pass_percent }}%.</p>
+    <div class="actions"><a href="{% url 'training:employee_quiz' attempt.quiz_id %}" class="btn btn-primary">Try again</a>
+    <a href="{% url 'training:employee_training_detail' assignment.pk %}" class="btn btn-outline">Back to module</a></div></div>
+</div>
+{% for r in rows %}
+<div class="card">
+  <div class="card-header"><h3>Q{{ forloop.counter }}. {{ r.question.text }}</h3><span class="badge {% if r.is_right %}badge-completed{% else %}badge-overdue{% endif %}">{% if r.is_right %}Correct{% else %}Wrong{% endif %}</span></div>
+  <div class="card-body"><ul class="choice-list">
+    {% for c in r.question.choices.all %}<li class="{% if c.is_correct %}correct{% elif c.id == r.chosen %}wrong{% endif %}"><span class="choice-mark">{% if c.is_correct %}&#10003;{% elif c.id == r.chosen %}&#10007;{% else %}{{ forloop.counter }}{% endif %}</span>{{ c.text }}{% if c.id == r.chosen %} <span class="small muted">(your answer)</span>{% endif %}</li>{% endfor %}
+  </ul></div>
+</div>
+{% endfor %}
+{% endblock %}

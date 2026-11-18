@@ -1,0 +1,25 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Bulk Import{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>Import employees from CSV</h2><p>Add many employees at once. Imported accounts are approved automatically.</p></div>
+  <a href="{% url 'training:bulk_import_template' %}" class="btn btn-outline">{% icon 'download' 16 %} Download template</a></div>
+<div class="grid grid-main">
+  <div class="card"><div class="card-body">
+    <form method="post" enctype="multipart/form-data" novalidate data-lock>{% csrf_token %}
+      {% include "partials/_form_errors.html" %}
+      {% include "partials/_field.html" with field=form.csv_file %}
+      <button type="submit" class="btn btn-primary">{% icon 'upload' 16 %} Import</button>
+    </form>
+    {% if report %}
+    <div class="section"><h3>Result</h3>
+      <p><span class="badge badge-completed">{{ report.created|length }} created</span> <span class="badge badge-overdue">{{ report.errors|length }} skipped</span></p>
+      {% if report.errors %}<div class="table-wrap"><table class="table"><thead><tr><th>CSV line</th><th>Problem</th></tr></thead><tbody>{% for line, msg in report.errors %}<tr><td>{{ line }}</td><td>{{ msg }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+    </div>{% endif %}
+  </div></div>
+  <div class="card" style="align-self:start"><div class="card-header"><h3>CSV format</h3></div><div class="card-body">
+    <p class="small">First row must be the header. Required: <strong>username</strong>, <strong>email</strong>. Optional columns below; if password is empty, <span class="mono">Welcome@123</span> is used. Any password is allowed.</p>
+    <p class="mono small">{% for c in columns %}{{ c }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    <p class="small muted">Maximum 500 rows and 1 MB per file. Rows with duplicate username or email are skipped.</p></div></div>
+</div>
+{% endblock %}

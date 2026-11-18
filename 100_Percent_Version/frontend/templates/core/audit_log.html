@@ -1,0 +1,15 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Audit Log{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>Audit log</h2><p>A record of important actions: logins, approvals, staff changes, imports and exports.</p></div></div>
+<div class="card">
+  <form method="get" class="filter-bar"><input type="search" name="q" value="{{ q }}" class="form-control search" placeholder="Search user, action or detail..."><button type="submit" class="btn btn-outline">Search</button></form>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+    <tbody>{% for l in logs %}<tr><td class="nowrap">{{ l.created_at|date:"d M Y, H:i" }}</td><td>{{ l.actor_name|default:"-" }}</td><td><span class="badge badge-primary">{{ l.action }}</span></td><td>{{ l.detail }}</td></tr>
+    {% empty %}<tr><td colspan="4">{% include "partials/_empty.html" with message="No log entries found." icon_name="shield" %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% include "partials/_pagination.html" with page=logs %}
+</div>
+{% endblock %}

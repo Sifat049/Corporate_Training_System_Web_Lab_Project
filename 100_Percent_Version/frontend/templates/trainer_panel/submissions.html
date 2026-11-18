@@ -1,0 +1,35 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Submissions{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Task submissions</h2><p>Evaluate your employees' work and give feedback.</p></div></div>
+<div class="card">
+  <form method="get" class="filter-bar">
+    <input type="search" class="form-control search" placeholder="Filter by employee or task..." data-table-filter="subTable">
+    <select name="status" class="form-control" onchange="this.form.submit()">
+      <option value="">All submissions</option>
+      <option value="submitted" {% if status == 'submitted' %}selected{% endif %}>Pending evaluation</option>
+      <option value="evaluated" {% if status == 'evaluated' %}selected{% endif %}>Evaluated</option>
+    </select>
+  </form>
+  <div class="table-wrap"><table class="table" id="subTable">
+    <thead><tr><th>Employee</th><th>Task</th><th>Module</th><th>Submitted</th><th>Status</th><th>Score</th><th></th></tr></thead>
+    <tbody>
+    {% for s in submissions %}
+      <tr>
+        <td>{% include "partials/_user_cell.html" with person=s.employee %}</td>
+        <td class="cell-title">{{ s.task.title }}</td>
+        <td>{{ s.task.module.title }}</td>
+        <td class="nowrap">{{ s.submitted_at|date:"d M Y, H:i" }}{% if s.is_late %} <span class="badge badge-overdue">Late</span>{% endif %}</td>
+        <td><span class="badge badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+        <td>{% if s.feedback %}{{ s.feedback.score }} / {{ s.task.max_score }}{% else %}-{% endif %}</td>
+        <td class="text-right"><a href="{% url 'training:trainer_evaluate' s.pk %}" class="btn {% if s.status == 'submitted' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">{% if s.status == 'submitted' %}Evaluate{% else %}Edit feedback{% endif %}</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7">{% include "partials/_empty.html" with message="No submissions found." icon_name="inbox" %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "partials/_pagination.html" with page=submissions %}
+</div>
+{% endblock %}

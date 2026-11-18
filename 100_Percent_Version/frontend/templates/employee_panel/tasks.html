@@ -1,0 +1,31 @@
+{% extends "layouts/app.html" %}
+{% block heading %}My Tasks{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>Assignments</h2><p>All tasks from your assigned modules.</p></div>
+  <form method="get"><select name="state" class="form-control" onchange="this.form.submit()">
+    <option value="">All tasks</option>
+    <option value="pending" {% if state == 'pending' %}selected{% endif %}>To do</option>
+    <option value="overdue" {% if state == 'overdue' %}selected{% endif %}>Overdue</option>
+    <option value="submitted" {% if state == 'submitted' %}selected{% endif %}>Submitted</option>
+    <option value="evaluated" {% if state == 'evaluated' %}selected{% endif %}>Evaluated</option>
+  </select></form>
+</div>
+<div class="card"><div class="table-wrap"><table class="table">
+  <thead><tr><th>Task</th><th>Module</th><th>Due</th><th>Status</th><th>Score</th><th></th></tr></thead>
+  <tbody>
+  {% for t in tasks %}
+    <tr>
+      <td class="cell-title">{{ t.title }}</td><td>{{ t.module.title }}</td>
+      <td class="nowrap">{{ t.due_date|date:"d M Y"|default:"-" }}</td>
+      <td><span class="badge badge-{{ t.state }}">{% if t.state == 'pending' %}To do{% elif t.state == 'overdue' %}Overdue{% else %}{{ t.submission.get_status_display }}{% endif %}</span></td>
+      <td>{% if t.submission.feedback %}{{ t.submission.feedback.score }} / {{ t.max_score }}{% else %}-{% endif %}</td>
+      <td class="text-right">{% if t.state == 'evaluated' %}<a href="{% url 'training:employee_feedback' %}" class="btn btn-outline btn-sm">Feedback</a>{% else %}<a href="{% url 'training:employee_task_submit' t.pk %}" class="btn btn-primary btn-sm">{% if t.submission %}Edit submission{% else %}Submit{% endif %}</a>{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">{% include "partials/_empty.html" with message="No tasks found." icon_name="clipboard" %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

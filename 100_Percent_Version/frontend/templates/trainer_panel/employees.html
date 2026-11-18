@@ -1,0 +1,27 @@
+{% extends "layouts/app.html" %}
+{% block heading %}My Employees{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Assigned employees</h2><p>Employees the HR Manager has assigned to you.</p></div></div>
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Employee</th><th>Department</th><th>Modules</th><th>Avg skill</th><th style="min-width:170px">Avg progress</th><th></th></tr></thead>
+      <tbody>
+      {% for emp in employees %}
+        <tr>
+          <td>{% include "partials/_user_cell.html" with person=emp %}</td>
+          <td>{{ emp.employee_profile.department|default:"-" }}<div class="cell-sub">{{ emp.employee_profile.job_title }}</div></td>
+          <td>{{ emp.module_count }}</td>
+          <td>{% if emp.avg_skill %}{{ emp.avg_skill }} / 5{% else %}<span class="muted">Not assessed</span>{% endif %}</td>
+          <td>{% include "partials/_progress.html" with value=emp.avg_progress %}</td>
+          <td class="text-right"><a href="{% url 'training:trainer_employee_detail' emp.pk %}" class="btn btn-outline btn-sm">View</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% include "partials/_empty.html" with message="No employees are assigned to you yet." icon_name="users" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

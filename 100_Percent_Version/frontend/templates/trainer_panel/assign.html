@@ -1,0 +1,39 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Assign Training{% endblock %}
+
+{% block content %}
+<div class="grid grid-main">
+  <div class="card">
+    <div class="card-header"><h3>Current assignments</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Employee</th><th>Module</th><th>Due</th><th>Status</th><th style="min-width:150px">Progress</th><th></th></tr></thead>
+      <tbody>
+      {% for a in assignments %}
+        <tr>
+          <td class="cell-title">{{ a.employee.display_name }}</td>
+          <td>{{ a.module.title }}<div class="cell-sub">{{ a.module.category.name }}</div></td>
+          <td class="nowrap">{{ a.due_date|date:"d M Y"|default:"-" }}</td>
+          <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
+          <td>{% include "partials/_progress.html" with value=a.progress_percent %}</td>
+          <td class="text-right"><form method="post" action="{% url 'training:trainer_assignment_delete' a.pk %}" class="inline" data-confirm="Remove this assignment and the employee's progress in it?">{% csrf_token %}<button class="btn btn-danger btn-sm">Remove</button></form></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% include "partials/_empty.html" with message="No assignments yet." icon_name="link" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Assign a module</h3></div>
+    <div class="card-body">
+      <form method="post" novalidate data-lock>
+        {% csrf_token %}
+        {% include "partials/_form_errors.html" %}
+        {% for field in form %}{% include "partials/_field.html" %}{% endfor %}
+        <button type="submit" class="btn btn-primary btn-block">Assign module</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

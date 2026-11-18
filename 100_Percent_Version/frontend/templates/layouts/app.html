@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block body %}
+<div class="app">
+  <!-- ======= Sidebar (role onujayi menu context processor theke ashe) ======= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">CT</div>
+      <div class="brand-text">Corporate Training<small>Skill Evaluation System</small></div>
+    </div>
+
+    <div class="nav-title">Menu</div>
+    <ul class="nav">
+      {% for item in nav_items %}
+        <li>
+          <a href="{{ item.url }}" class="{% if item.active %}active{% endif %}">
+            {% icon item.icon 19 %} <span>{{ item.label }}</span>
+            {% if item.badge %}<span class="badge-count">{{ item.badge }}</span>{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div class="nav-title">Account</div>
+    <ul class="nav">
+      {% for item in account_items %}
+        <li><a href="{{ item.url }}" class="{% if item.active %}active{% endif %}">{% icon item.icon 19 %} <span>{{ item.label }}</span></a></li>
+      {% endfor %}
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar">{{ user.initials }}</div>
+        <div><div class="name">{{ user.display_name }}</div><div class="role">{{ user.get_role_display }}</div></div>
+      </div>
+      <!-- Logout POST request (CSRF token shoho) -->
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">{% icon 'log-out' 17 %} Log out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ======= Main area ======= -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">{% icon 'menu' 24 %}</button>
+      <div>
+        <h1 id="pageHeading">{% block heading %}Dashboard{% endblock %}</h1>
+      </div>
+      <div class="topbar-right">
+        <span class="today-pill">{% now "D, d M Y" %}</span>
+        <button type="button" class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Dark / light mode"><span class="ico-moon">{% icon 'moon' 19 %}</span><span class="ico-sun">{% icon 'sun' 19 %}</span></button>
+        <div class="bell" id="bell">
+          <button type="button" class="icon-btn" id="bellBtn" aria-label="Notifications" aria-expanded="false">{% icon 'bell' 19 %}{% if unread_count %}<span class="bell-count">{% if unread_count > 9 %}9+{% else %}{{ unread_count }}{% endif %}</span>{% endif %}</button>
+          <div class="bell-menu" id="bellMenu">
+            <div class="bell-head"><strong>Notifications</strong><a href="{% url 'core:notifications' %}">View all</a></div>
+            {% for n in recent_notifications %}<a href="{% url 'core:notification_open' n.pk %}" class="bell-item {% if not n.is_read %}unread{% endif %}"><span class="notif-dot"></span><span>{{ n.message }}<small>{{ n.created_at|timesince }} ago</small></span></a>
+            {% empty %}<div class="bell-empty">No notifications yet</div>{% endfor %}
+          </div>
+        </div>
+        <span class="role-pill">{{ user.get_role_display }}</span>
+      </div>
+    </header>
+
+    <main class="content">
+      {% include "partials/_messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

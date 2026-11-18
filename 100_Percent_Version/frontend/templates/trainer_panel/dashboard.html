@@ -1,0 +1,31 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Trainer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head hero"><div><h2>Hello, {{ user.first_name|default:user.username }}</h2><p>Your trainees, modules and submissions waiting for evaluation.</p></div>
+  <div class="actions"><a href="{% url 'training:trainer_assign' %}" class="btn btn-primary">Assign training</a><a href="{% url 'training:module_create' %}" class="btn btn-outline">+ New module</a></div></div>
+
+<div class="grid grid-4">
+  <div class="card stat-card"><div class="stat-icon">{% icon 'users' 24 %}</div><div><div class="stat-value">{{ stats.trainees }}</div><div class="stat-label">Assigned employees</div></div></div>
+  <div class="card stat-card"><div class="stat-icon cyan">{% icon 'book' 24 %}</div><div><div class="stat-value">{{ stats.modules }}</div><div class="stat-label">My modules</div></div></div>
+  <div class="card stat-card"><div class="stat-icon amber">{% icon 'inbox' 24 %}</div><div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">Pending evaluations</div></div></div>
+  <div class="card stat-card"><div class="stat-icon green">{% icon 'check-square' 24 %}</div><div><div class="stat-value">{{ stats.evaluated }}</div><div class="stat-label">Evaluated</div></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Evaluation status</h3></div><div class="card-body chart-box"><canvas data-chart="donut" data-key="evaluation"></canvas></div></div>
+  <div class="card"><div class="card-header"><h3>Trainee progress</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="progress" data-height="240"></canvas></div></div>
+</div>
+
+<div class="card section">
+  <div class="card-header"><h3>Waiting for your evaluation</h3><a href="{% url 'training:trainer_submissions' %}" class="small">View all</a></div>
+  {% if pending_list %}
+  <ul class="list">{% for s in pending_list %}
+    <li><div><div class="cell-title">{{ s.task.title }}</div><div class="cell-sub">{{ s.employee.display_name }} &middot; {{ s.task.module.title }} &middot; {{ s.submitted_at|date:"d M, H:i" }}</div></div>
+    <a href="{% url 'training:trainer_evaluate' s.pk %}" class="btn btn-primary btn-sm">Evaluate</a></li>
+  {% endfor %}</ul>
+  {% else %}{% include "partials/_empty.html" with message="All caught up. No submissions waiting." icon_name="check-square" %}{% endif %}
+</div>
+{{ charts|json_script:"chart-data" }}
+{% endblock %}

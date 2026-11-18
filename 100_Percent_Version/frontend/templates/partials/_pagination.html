@@ -1,0 +1,15 @@
+{% load ui_extras %}{# {% include "partials/_pagination.html" with page=items %} - Page object lagbe #}
+{% if page.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Pagination">
+  <span class="muted small">Showing {{ page.start_index }}-{{ page.end_index }} of {{ page.paginator.count }}</span>
+  <div class="pages">
+    {% if page.has_previous %}<a href="{% page_url page.previous_page_number %}" class="page-link" aria-label="Previous">{% icon 'chevron-left' 16 %}</a>{% endif %}
+    {% for n in page.paginator.page_range %}
+      {% if n == page.number %}<span class="page-link current">{{ n }}</span>
+      {% elif n == 1 or n == page.paginator.num_pages or n >= page.number|add:"-1" and n <= page.number|add:"1" %}<a href="{% page_url n %}" class="page-link">{{ n }}</a>
+      {% elif n == page.number|add:"-2" or n == page.number|add:"2" %}<span class="page-link gap">&hellip;</span>{% endif %}
+    {% endfor %}
+    {% if page.has_next %}<a href="{% page_url page.next_page_number %}" class="page-link" aria-label="Next">{% icon 'chevron-right' 16 %}</a>{% endif %}
+  </div>
+</nav>
+{% endif %}

@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}HR Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head hero"><div><h2>Workforce skills overview</h2><p>Identify skill gaps and monitor training progress.</p></div>
+  <a href="{% url 'training:hr_skill_gaps' %}" class="btn btn-primary">View skill gaps</a></div>
+
+<div class="grid grid-4">
+  <div class="card stat-card"><div class="stat-icon">{% icon 'users' 24 %}</div><div><div class="stat-value">{{ stats.employees }}</div><div class="stat-label">Employees</div></div></div>
+  <div class="card stat-card"><div class="stat-icon amber">{% icon 'user-check' 24 %}</div><div><div class="stat-value">{{ stats.without_trainer }}</div><div class="stat-label">Without trainer</div></div></div>
+  <div class="card stat-card"><div class="stat-icon red">{% icon 'target' 24 %}</div><div><div class="stat-value">{{ stats.gaps }}</div><div class="stat-label">Open skill gaps</div></div></div>
+  <div class="card stat-card"><div class="stat-icon green">{% icon 'trending-up' 24 %}</div><div><div class="stat-value">{{ stats.avg_progress }}%</div><div class="stat-label">Avg training progress</div></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Assessed skill levels</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="skills" data-height="240"></canvas></div></div>
+  <div class="card"><div class="card-header"><h3>Progress by employee</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="progress" data-height="240"></canvas></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card">
+    <div class="card-header"><h3>Biggest skill gaps</h3><a href="{% url 'training:hr_skill_gaps' %}" class="small">View all</a></div>
+    {% if top_gaps %}
+    <ul class="list">{% for g in top_gaps %}
+      <li><div><div class="cell-title">{{ g.employee.display_name }}</div><div class="cell-sub">{{ g.category.name }}: level {{ g.level }} / required {{ g.required }}</div></div><span class="badge badge-danger">-{{ g.gap }}</span></li>
+    {% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="No skill gaps found." icon_name="target" %}{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><h3>Employees without a trainer</h3><a href="{% url 'training:hr_employees' %}" class="small">Assign now</a></div>
+    {% if unassigned %}
+    <ul class="list">{% for e in unassigned %}<li><div><div class="cell-title">{{ e.display_name }}</div><div class="cell-sub">{{ e.employee_profile.department }}</div></div><a href="{% url 'training:hr_employee_detail' e.pk %}" class="btn btn-outline btn-sm">Open</a></li>{% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="Every employee has a trainer." icon_name="user-check" %}{% endif %}
+  </div>
+</div>
+{{ charts|json_script:"chart-data" }}
+{% endblock %}

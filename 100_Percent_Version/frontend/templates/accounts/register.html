@@ -1,0 +1,27 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Register | Corporate Training{% endblock %}
+
+{% block auth_content %}
+<h1>Create employee account</h1>
+<p class="sub">Your account will be activated after Admin approval.</p>
+
+<form method="post" novalidate data-lock>
+  {% csrf_token %}
+  {% include "partials/_form_errors.html" %}
+  <div class="form-row">
+    {% include "partials/_field.html" with field=form.first_name %}
+    {% include "partials/_field.html" with field=form.last_name %}
+  </div>
+  {% include "partials/_field.html" with field=form.username %}
+  {% include "partials/_field.html" with field=form.email %}
+  <div class="form-row">
+    {% include "partials/_field.html" with field=form.department %}
+    {% include "partials/_field.html" with field=form.job_title %}
+  </div>
+  {% include "partials/_field.html" with field=form.phone %}
+  {% include "partials/_field.html" with field=form.password1 %}
+  {% include "partials/_field.html" with field=form.password2 %}
+  <button type="submit" class="btn btn-primary btn-block">Register</button>
+</form>
+<p class="auth-foot">Already registered? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+{% endblock %}

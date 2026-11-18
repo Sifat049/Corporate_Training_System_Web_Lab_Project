@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% block body %}
+<div class="auth">
+  <section class="auth-hero">
+    <div class="brand">
+      <div class="brand-logo">CT</div>
+      <div class="brand-text">Corporate Training<small>Skill Evaluation System</small></div>
+    </div>
+    <div>
+      <h2>Grow skills. Close gaps. Track every step of training.</h2>
+      <p>One platform for Admins, HR Managers, Trainers and Employees to plan training, submit work and measure real progress.</p>
+      <ul class="feature-list">
+        <li><span class="dot">{% icon 'book' 16 %}</span> Structured training modules with video &amp; document resources</li>
+        <li><span class="dot">{% icon 'check-square' 16 %}</span> Assignments, submissions and trainer feedback</li>
+        <li><span class="dot">{% icon 'bar-chart' 16 %}</span> Live skill-gap and progress dashboards</li>
+      </ul>
+    </div>
+    <p class="small" style="margin:0">Academic project demonstration &middot; Django + SQLite</p>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-box">
+      {% include "partials/_messages.html" %}
+      {% block auth_content %}{% endblock %}
+    </div>
+  </section>
+</div>
+{% endblock %}

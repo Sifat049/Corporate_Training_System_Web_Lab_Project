@@ -1,0 +1,19 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Calendar{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>{{ month_start|date:"F Y" }}</h2><p>Due dates of modules and tasks.</p></div>
+  <div class="actions"><a href="?month={{ prev_month }}" class="btn btn-outline btn-sm">{% icon 'chevron-left' 16 %} Prev</a><a href="{% url 'core:calendar' %}" class="btn btn-outline btn-sm">Today</a><a href="?month={{ next_month }}" class="btn btn-outline btn-sm">Next {% icon 'chevron-right' 16 %}</a></div></div>
+<div class="grid grid-main">
+  <div class="card"><div class="cal">
+    <div class="cal-head">{% for d in weekdays %}<div>{{ d }}</div>{% endfor %}</div>
+    {% for week in weeks %}<div class="cal-week">{% for day in week %}
+      <div class="cal-day {% if not day.in_month %}out{% endif %} {% if day.is_today %}today{% endif %}"><span class="cal-num">{{ day.date.day }}</span>
+        {% for ev in day.events %}{% if ev.url %}<a href="{{ ev.url }}" class="cal-ev {{ ev.kind }}" title="{{ ev.label }}">{{ ev.label }}</a>{% else %}<span class="cal-ev {{ ev.kind }}" title="{{ ev.label }}">{{ ev.label }}</span>{% endif %}{% endfor %}
+      </div>{% endfor %}</div>{% endfor %}
+  </div></div>
+  <div class="card" style="align-self:start"><div class="card-header"><h3>Next 30 days</h3></div>
+    {% if upcoming %}<ul class="list">{% for e in upcoming %}<li><div><div class="cell-title">{{ e.label }}</div><div class="cell-sub">{{ e.date|date:"D, d M" }}</div></div><span class="cal-dot {{ e.kind }}"></span></li>{% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="Nothing due in the next 30 days." icon_name="calendar" %}{% endif %}</div>
+</div>
+{% endblock %}

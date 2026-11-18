@@ -1,0 +1,14 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Notifications{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>Notifications</h2><p>Updates about assignments, evaluations, approvals and discussions.</p></div>
+  {% if unread_count %}<form method="post" action="{% url 'core:notification_read_all' %}">{% csrf_token %}<button type="submit" class="btn btn-outline">Mark all as read</button></form>{% endif %}</div>
+<div class="card">
+  {% if items %}<ul class="list notif-list">{% for n in items %}
+    <li class="{% if not n.is_read %}unread{% endif %}"><a href="{% url 'core:notification_open' n.pk %}" class="notif-link"><span class="notif-dot"></span><span class="notif-text">{{ n.message }}<small>{{ n.created_at|timesince }} ago</small></span></a></li>
+  {% endfor %}</ul>
+  {% include "partials/_pagination.html" with page=items %}
+  {% else %}{% include "partials/_empty.html" with message="You have no notifications yet." icon_name="bell" %}{% endif %}
+</div>
+{% endblock %}

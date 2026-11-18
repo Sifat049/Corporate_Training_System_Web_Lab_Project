@@ -1,0 +1,25 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Quiz: {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h2>{{ quiz.title }}</h2><p>{{ quiz.description|default:"Choose one answer for every question." }} You need <strong>{{ quiz.pass_percent }}%</strong> to pass. You can retry as many times as you like.</p></div>
+  <a href="{% url 'training:employee_training_detail' assignment.pk %}" class="btn btn-outline">&larr; Back to module</a>
+</div>
+<form method="post" novalidate data-lock>
+  {% csrf_token %}
+  {% for q in questions %}
+  <div class="card {% if q.id in errors %}card-error{% endif %}">
+    <div class="card-header"><h3>Q{{ forloop.counter }}. {{ q.text }}</h3>{% if q.id in errors %}<span class="badge badge-overdue">Answer required</span>{% endif %}</div>
+    <div class="card-body"><div class="choice-pick">
+      {% for c in q.choices.all %}
+      <label class="choice"><input type="radio" name="q{{ q.id }}" value="{{ c.id }}" {% if selected|get_item:q.id == c.id %}checked{% endif %}><span>{{ c.text }}</span></label>
+      {% endfor %}
+    </div></div>
+  </div>
+  {% endfor %}
+  <div class="form-actions"><button type="submit" class="btn btn-primary btn-lg">Submit answers</button></div>
+</form>
+{% if attempts %}<div class="card section"><div class="card-header"><h3>Your recent attempts</h3></div>
+<ul class="list">{% for a in attempts %}<li><div>{{ a.taken_at|date:"d M Y, H:i" }}</div><div class="actions"><strong>{{ a.percent }}%</strong> <span class="badge {% if a.passed %}badge-completed{% else %}badge-overdue{% endif %}">{% if a.passed %}Passed{% else %}Not passed{% endif %}</span></div></li>{% endfor %}</ul></div>{% endif %}
+{% endblock %}

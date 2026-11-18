@@ -1,0 +1,11 @@
+{# Django messages framework: view e messages.success(...) likhle ekhane dekhay #}
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+    <li class="alert alert-{{ message.tags }}" role="alert">
+      <span>{{ message }}</span>
+      <button type="button" class="close" aria-label="Close">&times;</button>
+    </li>
+  {% endfor %}
+</ul>
+{% endif %}

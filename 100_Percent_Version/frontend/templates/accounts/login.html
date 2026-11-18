@@ -1,0 +1,34 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Login | Corporate Training{% endblock %}
+
+{% block auth_content %}
+<h1>Welcome back</h1>
+<p class="sub">Sign in to continue to your dashboard.</p>
+
+<form method="post" novalidate data-lock>
+  {% csrf_token %}
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  {% include "partials/_form_errors.html" %}
+  {% include "partials/_field.html" with field=form.username %}
+  <div class="form-group {% if form.password.errors %}has-error{% endif %}">
+    <label for="{{ form.password.id_for_label }}">Password<span class="req">*</span></label>
+    <div class="password-wrap">
+      {{ form.password }}
+      <button type="button" data-toggle-password>Show</button>
+    </div>
+    {% for error in form.password.errors %}<small class="error">{{ error }}</small>{% endfor %}
+  </div>
+  <div class="forgot"><a href="{% url 'accounts:password_reset' %}">Forgot password?</a></div>
+  <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+</form>
+
+<p class="auth-foot">New employee? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+
+<div class="demo-box">
+  <strong>Demo accounts</strong> (run <code>python manage.py seed_demo</code> first)<br>
+  Admin: <code>admin</code> / <code>Admin@123</code><br>
+  HR: <code>hr_manager</code> / <code>Hr@12345</code><br>
+  Trainer: <code>trainer1</code> / <code>Trainer@123</code><br>
+  Employee: <code>employee1</code> / <code>Employee@123</code>
+</div>
+{% endblock %}

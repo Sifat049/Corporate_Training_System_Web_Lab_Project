@@ -1,0 +1,30 @@
+{% extends "layouts/app.html" %}
+{% block heading %}My Trainings{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>Assigned training modules</h2><p>Open a module to read lessons, watch resources and submit tasks.</p></div>
+  <form method="get"><select name="status" class="form-control" onchange="this.form.submit()">
+    <option value="">All statuses</option>
+    <option value="not_started" {% if status == 'not_started' %}selected{% endif %}>Not started</option>
+    <option value="in_progress" {% if status == 'in_progress' %}selected{% endif %}>In progress</option>
+    <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+  </select></form>
+</div>
+{% if assignments %}
+<div class="grid grid-3">
+  {% for a in assignments %}
+  <div class="card module-card">
+    <div class="flex between items-center"><span class="badge badge-primary">{{ a.module.category.name }}</span><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></div>
+    <h3>{{ a.module.title }}</h3>
+    <p class="muted small mb-0">{{ a.module.description|truncatechars:110 }}</p>
+    <div class="small muted">{{ a.module.get_difficulty_display }} &middot; {{ a.module.duration_hours }}h{% if a.due_date %} &middot; Due {{ a.due_date|date:"d M Y" }}{% endif %}{% if a.is_overdue %} <span class="badge badge-overdue">Overdue</span>{% endif %}</div>
+    {% include "partials/_progress.html" with value=a.progress_percent %}
+    <a href="{% url 'training:employee_training_detail' a.pk %}" class="btn btn-primary btn-block">{% if a.progress_percent == 0 %}Start{% elif a.status == 'completed' %}Review{% else %}Continue{% endif %}</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">{% include "partials/_empty.html" with message="No modules assigned yet. Your trainer will assign training to you." icon_name="book" %}</div>
+{% endif %}
+{% endblock %}

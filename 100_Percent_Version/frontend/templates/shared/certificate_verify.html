@@ -1,0 +1,13 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Verify certificate{% endblock %}
+{% block auth_content %}
+<h1>Certificate verification</h1>
+{% if cert %}
+<div class="alert alert-success"><strong>Valid certificate</strong></div>
+<dl class="kv"><dt>Awarded to</dt><dd>{{ cert.assignment.employee.display_name }}</dd><dt>Module</dt><dd>{{ cert.assignment.module.title }}</dd>
+<dt>Category</dt><dd>{{ cert.assignment.module.category.name }}</dd><dt>Issued</dt><dd>{{ cert.issued_at|date:"d F Y" }}</dd><dt>Code</dt><dd class="mono">{{ cert.code }}</dd></dl>
+{% else %}
+<div class="alert alert-error"><strong>No certificate found</strong> for the code "{{ code }}". Please check the code and try again.</div>
+{% endif %}
+<p class="auth-foot"><a href="{% url 'accounts:login' %}">Go to login</a></p>
+{% endblock %}

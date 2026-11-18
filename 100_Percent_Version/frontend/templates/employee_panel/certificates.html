@@ -1,0 +1,14 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}My Certificates{% endblock %}
+{% block content %}
+<div class="page-head"><div><h2>Certificates</h2><p>Complete every lesson, task and quiz in a module to earn its certificate.</p></div></div>
+{% if certificates %}
+<div class="grid grid-3">{% for c in certificates %}
+  <div class="card cert-card"><div class="cert-icon">{% icon 'award' 34 %}</div><h3>{{ c.assignment.module.title }}</h3>
+    <p class="muted small">{{ c.assignment.module.category.name }} &middot; issued {{ c.issued_at|date:"d M Y" }}</p>
+    <p class="mono small">Code: {{ c.code }}</p>
+    <a href="{% url 'training:certificate_view' c.pk %}" class="btn btn-primary btn-sm">View &amp; print</a></div>
+{% endfor %}</div>
+{% else %}<div class="card">{% include "partials/_empty.html" with message="No certificate yet. Finish a module to earn your first one." icon_name="award" %}</div>{% endif %}
+{% endblock %}

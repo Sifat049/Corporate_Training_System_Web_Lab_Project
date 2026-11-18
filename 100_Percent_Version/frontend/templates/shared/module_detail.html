@@ -1,0 +1,119 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}{{ module.title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="flex gap-1 wrap items-center">
+      <span class="badge badge-primary">{{ module.category.name }}</span>
+      <span class="badge badge-muted">{{ module.get_difficulty_display }}</span>
+      <span class="badge badge-muted">{{ module.duration_hours }} hours</span>
+      {% if module.is_published %}<span class="badge badge-approved">Published</span>{% else %}<span class="badge badge-pending">Draft</span>{% endif %}
+    </div>
+    <p class="mt-1">{{ module.description }}</p>
+  </div>
+  <div class="actions">
+    <a href="{% url 'training:module_edit' module.pk %}" class="btn btn-outline">Edit module</a>
+    <a href="{% url 'training:module_list' %}" class="btn btn-outline">&larr; Back</a>
+  </div>
+</div>
+
+<div class="grid grid-main">
+  <div>
+    <!-- Lessons -->
+    <div class="card">
+      <div class="card-header"><h3>Lessons ({{ lessons|length }})</h3><a href="{% url 'training:lesson_add' module.pk %}" class="btn btn-primary btn-sm">+ Add lesson</a></div>
+      {% if lessons %}
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>#</th><th>Title</th><th></th></tr></thead>
+        <tbody>
+        {% for l in lessons %}
+          <tr><td>{{ l.order }}</td><td><div class="cell-title">{{ l.title }}</div><div class="cell-sub">{{ l.content|truncatechars:90 }}</div></td>
+          <td class="text-right"><div class="actions" style="justify-content:flex-end">
+            <a href="{% url 'training:lesson_edit' l.pk %}" class="btn btn-outline btn-sm">Edit</a>
+            <form method="post" action="{% url 'training:lesson_delete' l.pk %}" class="inline" data-confirm="Delete this lesson?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+          </div></td></tr>
+        {% endfor %}
+        </tbody></table></div>
+      {% else %}{% include "partials/_empty.html" with message="No lessons yet." icon_name="book" %}{% endif %}
+    </div>
+
+    <!-- Resources -->
+    <div class="card">
+      <div class="card-header"><h3>Video &amp; document resources ({{ resources|length }})</h3><a href="{% url 'training:resource_add' module.pk %}" class="btn btn-primary btn-sm">+ Upload resource</a></div>
+      {% if resources %}
+      <ul class="list">
+        {% for r in resources %}
+        <li>
+          <div><div class="cell-title">{{ r.title }}</div><div class="cell-sub"><span class="badge badge-muted">{{ r.get_kind_display }}</span> {{ r.filename }}</div></div>
+          <div class="actions">
+            <a href="{% url 'core:resource_file' r.pk %}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Open</a>
+            <form method="post" action="{% url 'training:resource_delete' r.pk %}" class="inline" data-confirm="Delete this resource file?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}{% include "partials/_empty.html" with message="No resources uploaded." icon_name="inbox" %}{% endif %}
+    </div>
+
+    <!-- Quizzes (100% version) -->
+    <div class="card">
+      <div class="card-header"><h3>Quizzes ({{ quizzes|length }})</h3><a href="{% url 'training:quiz_add' module.pk %}" class="btn btn-primary btn-sm">+ Add quiz</a></div>
+      {% if quizzes %}
+      <ul class="list">{% for q in quizzes %}
+        <li><div><div class="cell-title">{{ q.title }}</div><div class="cell-sub">{{ q.questions.all|length }} question(s) &middot; pass mark {{ q.pass_percent }}%</div></div>
+        <div class="actions"><a href="{% url 'training:quiz_detail' q.pk %}" class="btn btn-outline btn-sm">Manage</a>
+        <form method="post" action="{% url 'training:quiz_delete' q.pk %}" class="inline" data-confirm="Delete this quiz with all questions and results?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form></div></li>
+      {% endfor %}</ul>
+      {% else %}{% include "partials/_empty.html" with message="No quizzes yet. Add an auto-graded quiz." icon_name="help" %}{% endif %}
+    </div>
+
+    <!-- Tasks -->
+    <div class="card">
+      <div class="card-header"><h3>Tasks / assignments ({{ tasks|length }})</h3><a href="{% url 'training:task_add' module.pk %}" class="btn btn-primary btn-sm">+ Create task</a></div>
+      {% if tasks %}
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Task</th><th>Due</th><th>Max score</th><th>Submissions</th><th></th></tr></thead>
+        <tbody>
+        {% for t in tasks %}
+          <tr>
+            <td><div class="cell-title">{{ t.title }}</div><div class="cell-sub">{{ t.instructions|truncatechars:70 }}</div></td>
+            <td class="nowrap">{{ t.due_date|date:"d M Y"|default:"-" }}</td><td>{{ t.max_score }}</td><td>{{ t.sub_count }}</td>
+            <td class="text-right"><div class="actions" style="justify-content:flex-end">
+              <a href="{% url 'training:task_edit' t.pk %}" class="btn btn-outline btn-sm">Edit</a>
+              <form method="post" action="{% url 'training:task_delete' t.pk %}" class="inline" data-confirm="Delete this task and its submissions?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+            </div></td>
+          </tr>
+        {% endfor %}
+        </tbody></table></div>
+      {% else %}{% include "partials/_empty.html" with message="No tasks yet." icon_name="clipboard" %}{% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-header"><h3>Assigned employees</h3></div>
+      {% if assignments %}
+      <ul class="list">
+        {% for a in assignments %}
+        <li style="flex-direction:column;align-items:stretch;gap:.4rem">
+          <div class="flex between"><span class="cell-title">{{ a.employee.display_name }}</span><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></div>
+          {% include "partials/_progress.html" with value=a.progress_percent %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}{% include "partials/_empty.html" with message="Nobody is assigned yet." icon_name="users" %}{% endif %}
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Details</h3></div>
+      <div class="card-body"><dl class="kv">
+        <dt>Created by</dt><dd>{{ module.created_by.display_name|default:"-" }}</dd>
+        <dt>Created</dt><dd>{{ module.created_at|date:"d M Y" }}</dd>
+        <dt>Updated</dt><dd>{{ module.updated_at|date:"d M Y" }}</dd>
+      </dl></div>
+    </div>
+  </div>
+</div>
+{% if not user.is_hr %}<div class="section">{% include "partials/_discussion.html" %}</div>{% endif %}
+{% endblock %}
