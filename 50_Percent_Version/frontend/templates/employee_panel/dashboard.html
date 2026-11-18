@@ -1,0 +1,57 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Welcome, {{ user.first_name|default:user.username }}</h2><p>Your personal training progress and skill levels.</p></div>
+  <a href="{% url 'training:employee_trainings' %}" class="btn btn-primary">Continue learning</a></div>
+
+<div class="grid grid-4">
+  <div class="card stat-card"><div class="stat-icon">{% icon 'book' 24 %}</div><div><div class="stat-value">{{ stats.assigned }}</div><div class="stat-label">Assigned modules</div></div></div>
+  <div class="card stat-card"><div class="stat-icon green">{% icon 'award' 24 %}</div><div><div class="stat-value">{{ stats.completed }}</div><div class="stat-label">Completed</div></div></div>
+  <div class="card stat-card"><div class="stat-icon amber">{% icon 'clipboard' 24 %}</div><div><div class="stat-value">{{ stats.pending_tasks }}</div><div class="stat-label">Tasks to submit</div></div></div>
+  <div class="card stat-card"><div class="stat-icon cyan">{% icon 'trending-up' 24 %}</div><div><div class="stat-value">{{ stats.avg_progress }}%</div><div class="stat-label">Overall progress</div></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Progress by module</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="progress" data-height="250"></canvas></div></div>
+  <div class="card"><div class="card-header"><h3>Skill level vs required</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="skills" data-height="250"></canvas></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card">
+    <div class="card-header"><h3>My trainings</h3><a href="{% url 'training:employee_trainings' %}" class="small">View all</a></div>
+    {% if assignments %}
+    <ul class="list">{% for a in assignments %}
+      <li style="flex-direction:column;align-items:stretch;gap:.4rem">
+        <div class="flex between"><a href="{% url 'training:employee_training_detail' a.pk %}" class="cell-title">{{ a.module.title }}</a><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></div>
+        {% include "partials/_progress.html" with value=a.progress_percent %}
+      </li>{% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="No training assigned yet. Your trainer will assign modules soon." icon_name="book" %}{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><h3>Tasks to submit</h3><a href="{% url 'training:employee_tasks' %}" class="small">View all</a></div>
+    {% if pending_tasks %}
+    <ul class="list">{% for t in pending_tasks %}
+      <li><div><div class="cell-title">{{ t.title }}</div><div class="cell-sub">{{ t.module.title }}{% if t.due_date %} &middot; due {{ t.due_date|date:"d M" }}{% endif %}</div></div>
+      <div class="actions">{% if t.state == 'overdue' %}<span class="badge badge-overdue">Overdue</span>{% endif %}<a href="{% url 'training:employee_task_submit' t.pk %}" class="btn btn-primary btn-sm">Submit</a></div></li>
+    {% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="You have no pending tasks." icon_name="check-square" %}{% endif %}
+  </div>
+</div>
+
+<div class="card section">
+  <div class="card-header"><h3>Latest trainer feedback</h3><a href="{% url 'training:employee_feedback' %}" class="small">View all</a></div>
+  {% if recent_feedback %}
+  <div class="card-body" style="display:grid;gap:1rem">
+    {% for f in recent_feedback %}
+    <div class="flex gap-2">
+      <div class="score-circle">{{ f.score }}/{{ f.submission.task.max_score }}</div>
+      <div style="flex:1"><div class="cell-title">{{ f.submission.task.title }}</div><div class="cell-sub mb-2" style="margin-bottom:.4rem">by {{ f.trainer.display_name|default:"Trainer" }} &middot; {{ f.updated_at|date:"d M Y" }}</div><div class="feedback-box">{{ f.comment }}</div></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}{% include "partials/_empty.html" with message="No feedback yet. Submit a task to get your first review." icon_name="message" %}{% endif %}
+</div>
+{{ charts|json_script:"chart-data" }}
+{% endblock %}

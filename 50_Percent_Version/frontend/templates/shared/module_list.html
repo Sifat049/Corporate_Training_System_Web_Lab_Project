@@ -1,0 +1,44 @@
+{% extends "layouts/app.html" %}
+{% block heading %}{% if user.is_admin %}Training Modules{% else %}My Modules{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>{% if user.is_admin %}All training modules{% else %}Modules you created{% endif %}</h2><p>Create modules, then add lessons, video/document resources and tasks.</p></div>
+  <a href="{% url 'training:module_create' %}" class="btn btn-primary">+ Create module</a>
+</div>
+<div class="card">
+  <form method="get" class="filter-bar">
+    <input type="search" name="q" value="{{ q }}" class="form-control search" placeholder="Search modules...">
+    <select name="category" class="form-control" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-outline">Search</button>
+  </form>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Module</th><th>Category</th><th>Level</th><th>Hours</th><th>Lessons</th><th>Tasks</th><th>Assigned</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for m in modules %}
+        <tr>
+          <td><a href="{% url 'training:module_detail' m.pk %}" class="cell-title">{{ m.title }}</a><div class="cell-sub">by {{ m.created_by.display_name|default:"-" }}</div></td>
+          <td>{{ m.category.name }}</td>
+          <td>{{ m.get_difficulty_display }}</td>
+          <td>{{ m.duration_hours }}h</td>
+          <td>{{ m.lesson_count }}</td>
+          <td>{{ m.task_count }}</td>
+          <td>{{ m.assigned_count }}</td>
+          <td>{% if m.is_published %}<span class="badge badge-approved">Published</span>{% else %}<span class="badge badge-muted">Draft</span>{% endif %}</td>
+          <td class="text-right"><div class="actions" style="justify-content:flex-end">
+            <a href="{% url 'training:module_detail' m.pk %}" class="btn btn-outline btn-sm">Manage</a>
+            <form method="post" action="{% url 'training:module_delete' m.pk %}" class="inline" data-confirm="Delete '{{ m.title }}' with all lessons, resources and tasks?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+          </div></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9">{% include "partials/_empty.html" with message="No modules yet. Create your first training module." icon_name="book" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

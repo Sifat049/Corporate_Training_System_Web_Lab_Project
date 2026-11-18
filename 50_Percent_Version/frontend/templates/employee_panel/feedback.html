@@ -1,0 +1,20 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Trainer Feedback{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Your evaluated tasks</h2><p>Scores and comments from your trainer.</p></div></div>
+{% for f in feedbacks %}
+<div class="card">
+  <div class="card-body flex gap-2">
+    <div class="score-circle" style="width:78px;height:78px">{{ f.score }}<small style="font-weight:500">/{{ f.submission.task.max_score }}</small></div>
+    <div style="flex:1;min-width:0">
+      <div class="flex between wrap gap-1"><h3 class="mb-0">{{ f.submission.task.title }}</h3><span class="badge badge-{% if f.percentage >= 70 %}success{% elif f.percentage >= 40 %}warning{% else %}danger{% endif %}">{{ f.percentage }}%</span></div>
+      <div class="cell-sub" style="margin-bottom:.6rem">{{ f.submission.task.module.title }} &middot; by {{ f.trainer.display_name|default:"Trainer" }} &middot; {{ f.updated_at|date:"d M Y" }}</div>
+      <div class="feedback-box">{{ f.comment }}</div>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="card">{% include "partials/_empty.html" with message="No feedback yet. When your trainer evaluates a submission it will appear here." icon_name="message" %}</div>
+{% endfor %}
+{% endblock %}

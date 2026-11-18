@@ -1,0 +1,4 @@
+{# Skill level 5 ta dot e dekhay. with level=3 required=4 #}
+<span class="level-dots" title="Level {{ level }} / required {{ required }}">
+  {% for n in "12345" %}<i class="{% if forloop.counter <= level %}on{% elif forloop.counter <= required %}gap{% endif %}"></i>{% endfor %}
+</span>

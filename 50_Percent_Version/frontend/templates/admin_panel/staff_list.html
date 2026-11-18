@@ -1,0 +1,45 @@
+{% extends "layouts/app.html" %}
+{% block heading %}HR Managers & Trainers{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>Staff accounts</h2><p>Add or remove HR Managers and Trainers.</p></div>
+  <a href="{% url 'training:staff_add' %}" class="btn btn-primary">+ Add HR / Trainer</a>
+</div>
+<div class="card">
+  <div class="filter-bar">
+    <input type="search" class="form-control search" placeholder="Search staff..." data-table-filter="staffTable">
+    <form method="get" class="flex gap-1">
+      <select name="role" class="form-control" onchange="this.form.submit()">
+        <option value="">All roles</option>
+        <option value="hr" {% if role == 'hr' %}selected{% endif %}>HR Managers</option>
+        <option value="trainer" {% if role == 'trainer' %}selected{% endif %}>Trainers</option>
+      </select>
+    </form>
+  </div>
+  <div class="table-wrap">
+    <table class="table" id="staffTable">
+      <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Expertise</th><th>Joined</th><th></th></tr></thead>
+      <tbody>
+      {% for person in staff %}
+        <tr>
+          <td>{% include "partials/_user_cell.html" %}</td>
+          <td><span class="badge badge-{{ person.role }}">{{ person.get_role_display }}</span></td>
+          <td>{{ person.email }}</td>
+          <td>{{ person.phone|default:"-" }}</td>
+          <td>{% if person.role == 'trainer' %}{{ person.trainer_profile.expertise|default:"-" }}{% else %}-{% endif %}</td>
+          <td class="nowrap">{{ person.date_joined|date:"d M Y" }}</td>
+          <td class="text-right">
+            <form method="post" action="{% url 'training:staff_delete' person.pk %}" class="inline" data-confirm="Remove {{ person.display_name }}? This cannot be undone.">
+              {% csrf_token %}<button class="btn btn-danger btn-sm">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7">{% include "partials/_empty.html" with message="No staff accounts found." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Progress Monitor{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Training progress</h2><p>Every assignment across the organisation with live progress.</p></div></div>
+<div class="card">
+  <form method="get" class="filter-bar">
+    <input type="search" class="form-control search" placeholder="Filter by employee or module..." data-table-filter="progTable">
+    <select name="status" class="form-control" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      <option value="not_started" {% if status == 'not_started' %}selected{% endif %}>Not started</option>
+      <option value="in_progress" {% if status == 'in_progress' %}selected{% endif %}>In progress</option>
+      <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+    </select>
+  </form>
+  <div class="table-wrap">
+    <table class="table" id="progTable">
+      <thead><tr><th>Employee</th><th>Module</th><th>Trainer</th><th>Due</th><th>Status</th><th style="min-width:170px">Progress</th></tr></thead>
+      <tbody>
+      {% for a in assignments %}
+        <tr>
+          <td><a href="{% url 'training:hr_employee_detail' a.employee.pk %}">{% include "partials/_user_cell.html" with person=a.employee %}</a></td>
+          <td><div class="cell-title">{{ a.module.title }}</div><div class="cell-sub">{{ a.module.category.name }}</div></td>
+          <td>{{ a.employee.employee_profile.trainer.display_name|default:"-" }}</td>
+          <td class="nowrap">{{ a.due_date|date:"d M Y"|default:"-" }}{% if a.is_overdue %} <span class="badge badge-overdue">Overdue</span>{% endif %}</td>
+          <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
+          <td>{% include "partials/_progress.html" with value=a.progress_percent %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% include "partials/_empty.html" with message="No assignments match this filter." icon_name="trending-up" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

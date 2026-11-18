@@ -1,0 +1,33 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Training Categories{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>Categories</h2><p>Group training modules and set the skill level employees should reach.</p></div>
+  <a href="{% url 'training:category_add' %}" class="btn btn-primary">+ Add category</a>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Category</th><th>Description</th><th>Required level</th><th>Modules</th><th></th></tr></thead>
+      <tbody>
+      {% for c in categories %}
+        <tr>
+          <td class="cell-title">{{ c.name }}</td>
+          <td class="muted">{{ c.description|default:"-"|truncatechars:80 }}</td>
+          <td>{% include "partials/_level.html" with level=c.required_level required=c.required_level %} <span class="small muted">{{ c.required_level|level_label }}</span></td>
+          <td>{{ c.module_count }}</td>
+          <td class="text-right"><div class="actions" style="justify-content:flex-end">
+            <a href="{% url 'training:category_edit' c.pk %}" class="btn btn-outline btn-sm">Edit</a>
+            <form method="post" action="{% url 'training:category_delete' c.pk %}" class="inline" data-confirm="Delete category '{{ c.name }}'?">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+          </div></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">{% include "partials/_empty.html" with message="No categories yet. Add the first one." icon_name="tag" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

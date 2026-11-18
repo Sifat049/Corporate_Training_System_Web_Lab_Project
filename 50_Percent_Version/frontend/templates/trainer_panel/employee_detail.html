@@ -1,0 +1,8 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Employee Progress{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><a href="{% url 'training:trainer_employees' %}">&larr; Back to my employees</a></div>
+  <a href="{% url 'training:trainer_assign' %}" class="btn btn-primary">Assign a module</a></div>
+{% include "partials/_employee_detail.html" %}
+{% endblock %}

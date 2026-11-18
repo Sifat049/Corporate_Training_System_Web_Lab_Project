@@ -1,0 +1,29 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Submit Task{% endblock %}
+
+{% block content %}
+<div class="grid grid-main">
+  <div class="card">
+    <div class="card-header"><h3>{{ task.title }}</h3>{% if submission %}<span class="badge badge-submitted">Already submitted - you can edit</span>{% endif %}</div>
+    <div class="card-body">
+      <p class="small muted">Module: {{ task.module.title }}{% if task.due_date %} &middot; Due {{ task.due_date|date:"d M Y" }}{% endif %} &middot; Max score {{ task.max_score }}</p>
+      <h3>Instructions</h3>
+      <p style="white-space:pre-wrap">{{ task.instructions }}</p>
+      <hr style="border:0;border-top:1px solid var(--border);margin:1.2rem 0">
+      <form method="post" enctype="multipart/form-data" novalidate data-lock>
+        {% csrf_token %}
+        {% include "partials/_form_errors.html" %}
+        {% for field in form %}{% include "partials/_field.html" %}{% endfor %}
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{% if submission %}Update submission{% else %}Submit task{% endif %}</button>
+          <a href="{% url 'training:employee_training_detail' assignment.pk %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="card" style="align-self:start"><div class="card-header"><h3>Tips</h3></div><div class="card-body small muted">
+    <p>Write your answer in the box or attach a file (PDF, DOC, ZIP, image...). Maximum file size is 50 MB.</p>
+    <p class="mb-0">You can edit your submission until your trainer evaluates it.</p>
+  </div></div>
+</div>
+{% endblock %}

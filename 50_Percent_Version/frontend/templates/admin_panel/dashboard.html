@@ -1,0 +1,58 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><h2>System overview</h2><p>Organisation-wide training statistics at a glance.</p></div>
+  <div class="actions">
+    <a href="{% url 'training:staff_add' %}" class="btn btn-primary">+ Add HR / Trainer</a>
+    <a href="{% url 'training:module_create' %}" class="btn btn-outline">+ New module</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat-card"><div class="stat-icon">{% icon 'users' 24 %}</div><div><div class="stat-value">{{ stats.employees }}</div><div class="stat-label">Approved employees</div></div></div>
+  <div class="card stat-card"><div class="stat-icon amber">{% icon 'user-check' 24 %}</div><div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">Pending approvals</div></div></div>
+  <div class="card stat-card"><div class="stat-icon cyan">{% icon 'award' 24 %}</div><div><div class="stat-value">{{ stats.trainers }}</div><div class="stat-label">Trainers</div></div></div>
+  <div class="card stat-card"><div class="stat-icon green">{% icon 'shield' 24 %}</div><div><div class="stat-value">{{ stats.hr }}</div><div class="stat-label">HR Managers</div></div></div>
+</div>
+<div class="grid grid-4 section">
+  <div class="card stat-card"><div class="stat-icon">{% icon 'tag' 24 %}</div><div><div class="stat-value">{{ stats.categories }}</div><div class="stat-label">Categories</div></div></div>
+  <div class="card stat-card"><div class="stat-icon cyan">{% icon 'book' 24 %}</div><div><div class="stat-value">{{ stats.modules }}</div><div class="stat-label">Training modules</div></div></div>
+  <div class="card stat-card"><div class="stat-icon amber">{% icon 'link' 24 %}</div><div><div class="stat-value">{{ stats.assignments }}</div><div class="stat-label">Assignments</div></div></div>
+  <div class="card stat-card"><div class="stat-icon green">{% icon 'trending-up' 24 %}</div><div><div class="stat-value">{{ stats.completion_rate }}%</div><div class="stat-label">Completion rate</div></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card"><div class="card-header"><h3>Training status</h3></div><div class="card-body chart-box"><canvas data-chart="donut" data-key="status"></canvas></div></div>
+  <div class="card"><div class="card-header"><h3>Modules per category</h3></div><div class="card-body chart-box"><canvas data-chart="bar" data-key="categories" data-height="240"></canvas></div></div>
+</div>
+
+<div class="grid grid-2 section">
+  <div class="card">
+    <div class="card-header"><h3>Pending employee approvals</h3><a href="{% url 'training:admin_employees' %}" class="small">View all</a></div>
+    {% if pending_employees %}
+    <ul class="list">
+      {% for p in pending_employees %}
+      <li>
+        <div><div class="cell-title">{{ p.display_name }}</div><div class="cell-sub">{{ p.email }} &middot; {{ p.employee_profile.department|default:"-" }}</div></div>
+        <form method="post" action="{% url 'training:employee_approve' p.pk %}" class="inline">{% csrf_token %}<button class="btn btn-success btn-sm">Approve</button></form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}{% include "partials/_empty.html" with message="No pending approvals." icon_name="user-check" %}{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><h3>Recent submissions</h3></div>
+    {% if recent_submissions %}
+    <ul class="list">
+      {% for s in recent_submissions %}
+      <li><div><div class="cell-title">{{ s.task.title }}</div><div class="cell-sub">{{ s.employee.display_name }} &middot; {{ s.task.module.title }}</div></div><span class="badge badge-{{ s.status }}">{{ s.get_status_display }}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}{% include "partials/_empty.html" with message="No submissions yet." %}{% endif %}
+  </div>
+</div>
+{{ charts|json_script:"chart-data" }}
+{% endblock %}

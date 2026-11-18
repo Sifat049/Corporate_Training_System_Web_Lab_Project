@@ -1,0 +1,41 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Evaluate Submission{% endblock %}
+
+{% block content %}
+<div class="grid grid-main">
+  <div>
+    <div class="card">
+      <div class="card-header"><h3>{{ submission.task.title }}</h3><span class="badge badge-{{ submission.status }}">{{ submission.get_status_display }}</span></div>
+      <div class="card-body">
+        <dl class="kv mb-2">
+          <dt>Employee</dt><dd>{{ submission.employee.display_name }}</dd>
+          <dt>Module</dt><dd>{{ submission.task.module.title }}</dd>
+          <dt>Submitted</dt><dd>{{ submission.submitted_at|date:"d M Y, H:i" }}{% if submission.is_late %} <span class="badge badge-overdue">Late</span>{% endif %}</dd>
+          <dt>Max score</dt><dd>{{ submission.task.max_score }}</dd>
+        </dl>
+        <h3>Task instructions</h3>
+        <p class="muted" style="white-space:pre-wrap">{{ submission.task.instructions }}</p>
+        <h3 class="mt-2">Employee's answer</h3>
+        {% if submission.answer_text %}<div class="code-box">{{ submission.answer_text }}</div>{% else %}<p class="muted">No written answer.</p>{% endif %}
+        {% if submission.attachment %}
+          <p class="mt-2"><a href="{{ submission.attachment.url }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Open attachment</a></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="card" style="align-self:start">
+    <div class="card-header"><h3>Score &amp; feedback</h3></div>
+    <div class="card-body">
+      <form method="post" novalidate data-lock>
+        {% csrf_token %}
+        {% include "partials/_form_errors.html" %}
+        {% for field in form %}{% include "partials/_field.html" %}{% endfor %}
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Save evaluation</button>
+          <a href="{% url 'training:trainer_submissions' %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}{{ module.title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="flex gap-1 wrap items-center"><span class="badge badge-primary">{{ module.category.name }}</span><span class="badge badge-muted">{{ module.get_difficulty_display }}</span><span class="badge badge-muted">{{ module.duration_hours }} hours</span><span class="badge badge-{{ assignment.status }}">{{ assignment.get_status_display }}</span></div>
+    <p class="mt-1">{{ module.description }}</p>
+  </div>
+  <a href="{% url 'training:employee_trainings' %}" class="btn btn-outline">&larr; My trainings</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="flex between"><strong>Your progress</strong><span class="muted small">{% if assignment.due_date %}Due {{ assignment.due_date|date:"d M Y" }}{% endif %}{% if assignment.assigned_by %} &middot; Assigned by {{ assignment.assigned_by.display_name }}{% endif %}</span></div>
+    <div class="mt-1">{% include "partials/_progress.html" with value=assignment.progress_percent %}</div>
+  </div>
+</div>
+
+<div class="grid grid-main section">
+  <div>
+    <div class="card">
+      <div class="card-header"><h3>Lessons</h3><span class="small muted">Open a lesson, read it, then mark it complete</span></div>
+      <div class="card-body">
+        {% for l in lessons %}
+        <details class="lesson-item {% if l.done %}done{% endif %}">
+          <summary><span class="lesson-num">{% if l.done %}&#10003;{% else %}{{ forloop.counter }}{% endif %}</span> {{ l.title }}</summary>
+          <div class="lesson-body">{{ l.content }}
+            <form method="post" action="{% url 'training:employee_lesson_toggle' assignment.pk l.pk %}" class="mt-2">
+              {% csrf_token %}
+              <button class="btn btn-sm {% if l.done %}btn-outline{% else %}btn-success{% endif %}">{% if l.done %}Mark as not complete{% else %}Mark as complete{% endif %}</button>
+            </form>
+          </div>
+        </details>
+        {% empty %}{% include "partials/_empty.html" with message="No lessons have been added yet." icon_name="book" %}{% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Tasks</h3></div>
+      {% if tasks %}
+      <ul class="list">{% for t in tasks %}
+        <li>
+          <div><div class="cell-title">{{ t.title }}</div><div class="cell-sub">{% if t.due_date %}Due {{ t.due_date|date:"d M Y" }} &middot; {% endif %}Max score {{ t.max_score }}{% if t.submission.feedback %} &middot; You scored {{ t.submission.feedback.score }}{% endif %}</div></div>
+          <div class="actions"><span class="badge badge-{{ t.state }}">{% if t.state == 'pending' %}To do{% elif t.state == 'overdue' %}Overdue{% else %}{{ t.submission.get_status_display }}{% endif %}</span>
+          {% if t.state == 'evaluated' %}<a href="{% url 'training:employee_feedback' %}" class="btn btn-outline btn-sm">Feedback</a>
+          {% else %}<a href="{% url 'training:employee_task_submit' t.pk %}" class="btn btn-primary btn-sm">{% if t.submission %}Edit{% else %}Submit{% endif %}</a>{% endif %}</div>
+        </li>
+      {% endfor %}</ul>
+      {% else %}{% include "partials/_empty.html" with message="No tasks in this module." icon_name="clipboard" %}{% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="align-self:start">
+    <div class="card-header"><h3>Resources</h3></div>
+    {% if resources %}
+    <ul class="list">{% for r in resources %}
+      <li><div><div class="cell-title">{{ r.title }}</div><div class="cell-sub"><span class="badge badge-muted">{{ r.get_kind_display }}</span> {{ r.extension|upper }}</div></div>
+      <a href="{{ r.file.url }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">{% if r.kind == 'video' %}Watch{% else %}Open{% endif %}</a></li>
+    {% endfor %}</ul>
+    {% else %}{% include "partials/_empty.html" with message="No resources uploaded." icon_name="inbox" %}{% endif %}
+  </div>
+</div>
+{% endblock %}

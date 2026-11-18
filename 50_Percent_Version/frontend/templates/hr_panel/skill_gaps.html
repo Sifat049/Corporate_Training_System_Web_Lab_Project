@@ -1,0 +1,36 @@
+{% extends "layouts/app.html" %}
+{% load ui_extras %}
+{% block heading %}Skill Gap Analysis{% endblock %}
+
+{% block content %}
+<div class="page-head"><div><h2>Skill gaps</h2><p>Employees whose current level is below the required level of a category. Not-assessed counts as level 0.</p></div></div>
+<div class="card">
+  <form method="get" class="filter-bar">
+    <input type="search" class="form-control search" placeholder="Filter results..." data-table-filter="gapTable">
+    <select name="category" class="form-control" onchange="this.form.submit()">
+      <option value="0">All categories</option>
+      {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <span class="muted small">{{ gaps|length }} gap{{ gaps|length|pluralize }} found</span>
+  </form>
+  <div class="table-wrap">
+    <table class="table" id="gapTable">
+      <thead><tr><th>Employee</th><th>Category</th><th>Current</th><th>Required</th><th>Gap</th><th></th></tr></thead>
+      <tbody>
+      {% for g in gaps %}
+        <tr>
+          <td>{% include "partials/_user_cell.html" with person=g.employee %}</td>
+          <td>{{ g.category.name }}</td>
+          <td>{% include "partials/_level.html" with level=g.level required=g.required %} <span class="small muted">{% if g.assessed %}{{ g.level|level_label }}{% else %}Not assessed{% endif %}</span></td>
+          <td>{{ g.required }}</td>
+          <td><span class="badge badge-danger">-{{ g.gap }}</span></td>
+          <td class="text-right"><a href="{% url 'training:hr_employee_detail' g.employee.pk %}" class="btn btn-outline btn-sm">View</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% include "partials/_empty.html" with message="No skill gaps. Everyone meets the required levels." icon_name="award" %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

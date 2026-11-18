@@ -1,0 +1,16 @@
+{% extends "layouts/app.html" %}
+{% block heading %}Employee Profile{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><a href="{% url 'training:hr_employees' %}">&larr; Back to employees</a></div>
+  <form method="post" action="{% url 'training:hr_assign_trainer' emp.pk %}" class="flex gap-1 items-center">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'training:hr_employee_detail' emp.pk %}">
+    <label class="small muted" for="id_trainer">Trainer</label>
+    {{ trainer_form.trainer }}
+    <button class="btn btn-primary btn-sm">Assign</button>
+  </form>
+</div>
+{% include "partials/_employee_detail.html" %}
+{% endblock %}
